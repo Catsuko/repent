@@ -4,8 +4,9 @@ require_relative 'repent_services_pb'
 module Repent
   class Client
 
-    def initialize(name:)
+    def initialize(name:, formatter:)
       @name = name
+      @formatter = formatter
     end
 
     def join(chat_room)
@@ -21,16 +22,8 @@ module Repent
       Thread.new do
         message_stream = chat_room.join(JoinRequest.new(name: @name))
         message_stream.each do |message|
-          STDOUT.puts format_output(message)
+          @formatter.format(message) { |line| STDOUT.puts(line) }
         end
-      end
-    end
-
-    def format_output(message)
-      if message.sender == 'system'
-        "--- #{message.text} ---"
-      else
-        "#{message.sender}: #{message.text}"
       end
     end
 
