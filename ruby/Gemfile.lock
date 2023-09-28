@@ -13,9 +13,13 @@ GEM
     fiber-annotation (0.2.0)
     fiber-local (1.0.0)
     google-protobuf (3.24.3-x64-mingw-ucrt)
+    google-protobuf (3.24.3-x86_64-darwin)
     googleapis-common-protos-types (1.9.0)
       google-protobuf (~> 3.18)
     grpc (1.58.0-x64-mingw-ucrt)
+      google-protobuf (~> 3.23)
+      googleapis-common-protos-types (~> 1.0)
+    grpc (1.58.0-x86_64-darwin)
       google-protobuf (~> 3.23)
       googleapis-common-protos-types (~> 1.0)
     grpc-tools (1.58.0)
@@ -28,6 +32,7 @@ GEM
 
 PLATFORMS
   x64-mingw-ucrt
+  x86_64-darwin-22
 
 DEPENDENCIES
   async (~> 2.6)
