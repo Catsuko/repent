@@ -2,18 +2,15 @@ module Repent
   module Formatters
     class Split
 
-      def initialize(name, my_format:, their_format:)
+      def initialize(name, on_match:, fallback:)
         @name = name
-        @my_format = my_format
-        @their_format = their_format
+        @on_match = on_match
+        @fallback = fallback
       end
 
       def format(message, &handler)
-        if message.sender == @name
-          @my_format.format(message, &handler)
-        else
-          @their_format.format(message, &handler)
-        end
+        formatter = message.sender == @name ? @on_match : @fallback
+        formatter.format(message, &handler)
       end
 
     end
