@@ -8,9 +8,9 @@ module Repent
         @fallback = fallback
       end
 
-      def format(message, &handler)
-        formatter = message.sender == @name ? @on_match : @fallback
-        formatter.format(message, &handler)
+      def format(text, sender:, &handler)
+        formatter = sender == @name ? @on_match : @fallback
+        formatter.format(text, sender: sender, &handler)
       end
 
     end

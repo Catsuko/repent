@@ -8,8 +8,8 @@ module Repent
         @width = width
       end
 
-      def format(message, &handler)
-        @formatter.format(message) do |result|
+      def format(text, sender:, &handler)
+        @formatter.format(text, sender: sender) do |result|
           handler.call(@left ? result.ljust(@width) : result.rjust(@width))
         end
       end

@@ -22,7 +22,9 @@ module Repent
       Thread.new do
         message_stream = chat_room.join(JoinRequest.new(name: @name))
         message_stream.each do |message|
-          @formatter.format(message) { |line| STDOUT.puts(line) }
+          @formatter.format(message.text, sender: message.sender) do |line|
+            STDOUT.puts(line)
+          end
         end
       end
     end

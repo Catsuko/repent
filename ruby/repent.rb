@@ -4,7 +4,4 @@ $LOAD_PATH.unshift(lib_dir) unless $LOAD_PATH.include?(lib_dir)
 
 require 'server'
 require 'client'
-require 'formatters/split'
-require 'formatters/plain'
-require 'formatters/justified'
-require 'formatters/with_names'
+require 'formatter'

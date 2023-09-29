@@ -2,8 +2,8 @@ module Repent
   module Formatters
     class Plain
 
-      def format(message, &handler)
-        handler.call(message.text)
+      def format(text, *, &handler)
+        handler.call(text)
       end
 
     end
