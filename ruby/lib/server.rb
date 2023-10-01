@@ -44,7 +44,8 @@ module Repent
     end
 
     def say(content, _call)
-      broadcast(content.text, sender: content.sender, receiver: content.receiver)
+      text = content.text.delete(@delimiter).strip
+      broadcast(text, sender: content.sender, receiver: content.receiver) unless text.empty?
       Empty.new
     end
 
@@ -76,7 +77,7 @@ module Repent
         on.message do |channel, payload|
           case channel
           when message_channel
-            inbox << payload
+            inbox.push(payload)
           when disconnect_channel
             subscriber.unsubscribe(message_channel, disconnect_channel) if name == payload
           end
