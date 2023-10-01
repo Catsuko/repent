@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package repent;
 
-message JoinRequest {
+message MemberDetails {
   string name = 1;
 }
 
@@ -21,6 +21,7 @@ message Empty {
 }
 
 service ChatRoom {
-  rpc Join(JoinRequest) returns (stream Message);
+  rpc Join(MemberDetails) returns (stream Message);
+  rpc Leave(MemberDetails) returns (Empty);
   rpc Say(MessageContent) returns (Empty);
 }

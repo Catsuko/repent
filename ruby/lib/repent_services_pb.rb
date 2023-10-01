@@ -14,7 +14,8 @@ module Repent
       self.unmarshal_class_method = :decode
       self.service_name = 'repent.ChatRoom'
 
-      rpc :Join, ::Repent::JoinRequest, stream(::Repent::Message)
+      rpc :Join, ::Repent::MemberDetails, stream(::Repent::Message)
+      rpc :Leave, ::Repent::MemberDetails, ::Repent::Empty
       rpc :Say, ::Repent::MessageContent, ::Repent::Empty
     end
 
