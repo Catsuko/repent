@@ -4,8 +4,9 @@ require_relative 'repent_services_pb'
 module Repent
   class Client
 
-    def initialize(name:, formatter:)
+    def initialize(name:, room_name:, formatter:)
       @name = name
+      @room_name = room_name
       @formatter = formatter
     end
 
@@ -34,12 +35,12 @@ module Repent
     def send_messages(chat_room)
       loop do
         text = STDIN.gets.chomp.tap { STDOUT.print "\e[A\e[2K" }
-        chat_room.say(MessageContent.new(text: text, sender: @name))
+        chat_room.say(MessageContent.new(text: text, sender: @name, room: @room_name))
       end
     end
 
     def member_details
-      MemberDetails.new(name: @name)
+      MemberDetails.new(name: @name, room: @room_name)
     end
 
   end

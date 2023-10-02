@@ -14,14 +14,14 @@ module Repent
     end
 
     def join(member, call)
-      raise GRPC::AlreadyExists unless add_to_room?(member.name)
+      raise GRPC::AlreadyExists unless add_to_room?(member)
 
-      broadcast("#{member.name} joined the room", sender: SYSTEM_SENDER)
+      broadcast("#{member.name} joined the room", room: member.room, sender: SYSTEM_SENDER)
       inbox = Queue.new
 
       Enumerator.new do |stream|
         Sync do
-          Async(transient: true) { listen_for_messages(member.name, inbox: inbox) }
+          Async(transient: true) { listen_for_messages(member, inbox: inbox) }
           Async do
             until inbox.closed?
               next_message = inbox.pop
@@ -37,53 +37,55 @@ module Repent
 
     def leave(member, _call)
       @redis.pipelined do |pipeline|
-        pipeline.publish(disconnect_channel, member.name)
-        pipeline.srem(member_set_key, member.name)
+        pipeline.publish(disconnect_channel(member.room), member.name)
+        pipeline.srem(member_set_key(member.room), member.name)
       end
       Empty.new
     end
 
     def say(content, _call)
       text = content.text.delete(@delimiter).strip
-      broadcast(text, sender: content.sender, receiver: content.receiver) unless text.empty?
+      broadcast(text, sender: content.sender, room: content.room, receiver: content.receiver) unless text.empty?
       Empty.new
     end
 
   private
 
-    def broadcast(text, sender:, receiver: nil)
-      @redis.publish(message_channel, "#{sender}#{@delimiter}#{text}")
+    def broadcast(text, sender:, room:, receiver: nil)
+      @redis.publish(message_channel(room), "#{sender}#{@delimiter}#{text}")
     end
 
-    def member_set_key
-      "chat_room:members"
+    def member_set_key(room)
+      "chat_room:#{room}:members"
     end
 
-    def message_channel
-      "chat_room:message"
+    def message_channel(room)
+      "chat_room:#{room}:message"
     end
 
-    def disconnect_channel
-      "chat_room:disconnect"
+    def disconnect_channel(room)
+      "chat_room:#{room}:disconnect"
     end
 
-    def add_to_room?(name)
-      name != SYSTEM_SENDER && @redis.sadd(member_set_key, name).positive?
+    def add_to_room?(member)
+      member.name != SYSTEM_SENDER && @redis.sadd(member_set_key(member.room), member.name).positive?
     end
 
-    def listen_for_messages(name, inbox:)
+    def listen_for_messages(member, inbox:)
       subscriber = Redis.new
-      subscriber.subscribe(message_channel, disconnect_channel) do |on|
+      room_message_channel = message_channel(member.room)
+      room_dc_channel = disconnect_channel(member.room)
+      subscriber.subscribe(room_message_channel, room_dc_channel) do |on|
         on.message do |channel, payload|
           case channel
-          when message_channel
+          when room_message_channel
             inbox.push(payload)
-          when disconnect_channel
-            subscriber.unsubscribe(message_channel, disconnect_channel) if name == payload
+          when room_dc_channel
+            subscriber.unsubscribe(room_message_channel, room_dc_channel) if member.name == payload
           end
         end
         on.unsubscribe do |channel, sub_count|
-          inbox.close if channel == message_channel
+          inbox.close if channel == room_message_channel
         end
       end
     end

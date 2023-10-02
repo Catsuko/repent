@@ -4,12 +4,14 @@ package repent;
 
 message MemberDetails {
   string name = 1;
+  string room = 2;
 }
 
 message MessageContent {
   string sender = 1;
   string text = 2;
   optional string receiver = 3;
+  string room = 4;
 }
 
 message Message {
